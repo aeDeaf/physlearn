@@ -21,7 +21,6 @@ def find_points(y_points):
     g_index = 0
     l_index = 0
     # ...и проводим стандарнтый поиск.
-    #print(y_points)
     for index, item in enumerate(y_points):
         if item > h_point:
             g_point = h_point
