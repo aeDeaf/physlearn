@@ -53,9 +53,6 @@ def iteration(func, population, func_population, f, p):
         first_partner_func = func_population[index]  # Находим соответсвующее значение функции
         partner, partner_index = choose_partner(index, population)
         a_vector, b_vector = choose_two_random_vectors(index, partner_index, population)
-        # partner = population[partner_array[index]]
-        # a_vector = population[a_array[index]]
-        # b_vector = population[b_array[index]]
         mutation_partner = mutation(partner, a_vector, b_vector, f)  # Проводим мутацию
         child = cross(first_partner, mutation_partner, p)  # Делаем потомка
         child_func = func(child)  # Вычисляем значение функции потомка
