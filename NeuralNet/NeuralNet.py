@@ -5,9 +5,11 @@ from tqdm import tqdm
 
 
 class NeuralNet(NeuralNetAbstract):
+    train_type = None
 
     def __init__(self, min_element, max_element):
         super().__init__(min_element, max_element)
+        self.train_type = None
 
     def calc(self, calc_var, d):
         return self.sess.run(calc_var, d)
@@ -32,7 +34,7 @@ class NeuralNet(NeuralNetAbstract):
             tf_matrixes.append((tf_weight_matrix, tf_bias_vector))
         return tf_matrixes
 
-    def train(self, train_type, x, y, batch_size, max_iters, alpha):
+    def train(self, x, y, batch_size, max_iters, alpha):
         # Обучение НС
         # Возвращает список cost_list - список значений ценовой функции на каждой итерации,
         # или -1, если произошла ошибка
@@ -42,15 +44,15 @@ class NeuralNet(NeuralNetAbstract):
         # batch_size - размер batch (подвыборки), которая на каждой итерации обучения будет выбираться случайным образом
         # max_iters - количество итераций
         # alpha - шаг обучения
+        if self.train_type is None:
+            print('Set train type before train')
         if not self.if_compile:  # Проверка на то, что НС была скомпилировнна
             print('Compile model before calculate cost')
             return -1
 
         self.sess.run(self.init)  # Сброс матриц к начальным значениям
-        self.train_type = train_type
-        cost_list = []
-        if train_type == 'prediction':  # Задача регрессии - апроксимация какой-либо функции
-            self.__prediction_train(alpha, cost_list, batch_size, max_iters, x, y)
+        cost_list = self.__gradient_descent(alpha, batch_size, max_iters, x, y)
+
         return cost_list
 
     def continue_train(self, x, y, batch_size, max_iters, alpha):
@@ -61,15 +63,11 @@ class NeuralNet(NeuralNetAbstract):
         if not self.if_compile:
             print('Compile model before calculate cost')
             return -1
-        cost_list = []
-        if self.train_type == 'prediction':
-            self.__prediction_train(alpha, cost_list, batch_size, max_iters, x, y)
+        cost_list = self.__gradient_descent(alpha, batch_size, max_iters, x, y)
         return cost_list
 
-    def __prediction_train(self, alpha, cost_list, batch_size, max_iters, x, y):
-        # Фактически обучение НС
-        # Параметры - см. self.train
-        self.cost = tf.reduce_mean((self.output - self.y) ** 2)  # Вычисление ценовой функции
+    def __gradient_descent(self, alpha, batch_size, max_iters, x, y):
+        cost_list = []
         optimizer = tf.train.GradientDescentOptimizer(alpha)  # Инициализация оптимизатора...
         train = optimizer.minimize(self.cost)
         # ...которым в данном случае является обычный градиенты спуск с шагом обучения alpha
@@ -78,6 +76,7 @@ class NeuralNet(NeuralNetAbstract):
             # будет состоять подвыборка на данном итерации обучения
             _, cur_cost = self.sess.run([train, self.cost], {self.x: x[:, batch_indexes], self.y: y[:, batch_indexes]})
             cost_list.append(cur_cost)
+        return cost_list
 
     def assign_matrixes(self, tf_matrixes):
         # Выполнение присваивания матрицам значений

@@ -17,6 +17,7 @@ class NeuralNetAbstract:
     size_list = []  # Размеры матриц весов и векторов сдвига
     unroll_breaks = [(0, 0)]  # Индексы концов каждой матрицы в unroll векторе
     amount_of_outputs = None
+    output_activation_func = None
 
     def __init__(self, min_element, max_element):
         # Присваивание значений, сброс к начальным условиям
@@ -40,8 +41,9 @@ class NeuralNetAbstract:
         # как наследие прошлой реализации, хотя можно использовать и None
         self.add(amount_of_units, self.linear)
 
-    def add_output_layer(self, amount_of_units):
+    def add_output_layer(self, amount_of_units, output_activation_func):
         self.amount_of_outputs = amount_of_units
+        self.output_activation_func = output_activation_func
 
     # Просто тождественная функция
     @staticmethod
@@ -70,7 +72,7 @@ class NeuralNetAbstract:
             self.tf_layers = []
             self.init = None
         else:
-            self.add(self.amount_of_outputs, self.linear)  # Добавление выходного слоя
+            self.add(self.amount_of_outputs, self.output_activation_func)  # Добавление выходного слоя
             # Выходной слой добавляется здесь, так как необходиом гарантировать, что он является последним
         self.if_compile = True
         self.x = tf.placeholder(tf.double)  # Создание placeholder для входных данных...
@@ -104,6 +106,19 @@ class NeuralNetAbstract:
         result = self.calc(self.output, {self.x: inputs})
         return result
 
+    def set_train_type(self, train_type):
+        # В данной функции устанавливается тип обучения и выражение для вычисления ценовой функции
+        self.train_type = train_type
+        self.__set_cost_function()
+
+    def __set_cost_function(self):
+        # В зависимости от типа обучения, выбираем нужную ценовую функцию
+        if self.train_type == 'prediction':
+            self.cost = tf.reduce_mean((self.output - self.y) ** 2)  # Вычисление ценовой функции
+        elif self.train_type == 'logistic':
+            self.cost = tf.reduce_mean(-tf.reduce_sum(self.y * tf.log(self.output) +
+                                                      (1 - self.y) * tf.log(1 - self.output)))
+
     def calculate_cost(self, x, y):
         # Вычисление ценовой функции
         # Параметры x и y - аналогично self.train
@@ -112,7 +127,7 @@ class NeuralNetAbstract:
             return -1
 
         if self.cost is None:  # Проверка на то, что self.cost не None...
-            self.cost = tf.reduce_mean((self.output - self.y) ** 2)  # ...если None - определяем self.cost
+            self.__set_cost_function()
 
         return self.calc(self.cost, {self.x: x, self.y: y})  # Возвращаем вычисленное значение ценовой функции
 
