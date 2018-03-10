@@ -73,7 +73,7 @@ class NeuralNet(NeuralNetAbstract):
         # ...которым в данном случае является обычный градиенты спуск с шагом обучения alpha
         for _ in tqdm(range(max_iters)):
             batch_indexes = numpy.random.randint(0, x.shape[1], batch_size)  # Случайный выбор инедксов, из которых
-            # будет состоять подвыборка на данном итерации обучения
+            # будет состоять подвыборка на данной итерации обучения
             _, cur_cost = self.sess.run([train, self.cost], {self.x: x[:, batch_indexes], self.y: y[:, batch_indexes]})
             cost_list.append(cur_cost)
         return cost_list
