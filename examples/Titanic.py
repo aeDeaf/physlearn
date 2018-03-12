@@ -39,8 +39,8 @@ def create_datasets(cv_percent):
     survived_array = list2vector(survived_list)
 
     # Разделяем данные на обучающую и проверочные выборки
-    l = class_array.shape[0]
-    break_point = math.floor((1 - cv_percent) * l)
+    total_len = class_array.shape[0]
+    break_point = math.floor((1 - cv_percent) * total_len)
 
     class_learn = class_array[:break_point]
     class_cv = class_array[break_point:]

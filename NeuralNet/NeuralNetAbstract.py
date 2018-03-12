@@ -19,6 +19,15 @@ class NeuralNetAbstract:
     amount_of_outputs = None
     output_activation_func = None
 
+    # Просто тождественная функция
+    @staticmethod
+    def linear(x):
+        return x
+
+    @staticmethod
+    def sigmoid(x):
+        return tf.sigmoid(x)
+
     def __init__(self, min_element, max_element):
         # Присваивание значений, сброс к начальным условиям
         self.min_element = min_element
@@ -44,11 +53,6 @@ class NeuralNetAbstract:
     def add_output_layer(self, amount_of_units, output_activation_func):
         self.amount_of_outputs = amount_of_units
         self.output_activation_func = output_activation_func
-
-    # Просто тождественная функция
-    @staticmethod
-    def linear(x):
-        return x
 
     def create_tf_matrixes(self):
         # Данный метод создает матрицы в формате tf.placeholder
@@ -155,7 +159,6 @@ class NeuralNetAbstract:
             bias_vector = unroll_vector[right_weight_break:right_bias_break].reshape(self.size_list[index][1])
             tf_matrixes.append((weight_matrix, bias_vector))
         self.assign_matrixes(tf_matrixes)
-        return tf_matrixes
 
     @staticmethod
     def create_unroll_vector(numpy_matrixes):
