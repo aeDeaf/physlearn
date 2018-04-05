@@ -6,7 +6,7 @@ from physlearn.NeuralNet.NeuralNetAbstract import NeuralNetAbstract
 class NeuralNetPro(NeuralNetAbstract):
     placeholders_dict = {}
 
-    def __init__(self, min_element, max_element):
+    def __init__(self, min_element=-1, max_element=1):
         super().__init__(min_element, max_element)
 
     def calc(self, calc_var, d):

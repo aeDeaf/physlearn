@@ -7,7 +7,7 @@ from tqdm import tqdm
 class NeuralNet(NeuralNetAbstract):
     train_type = None
 
-    def __init__(self, min_element, max_element):
+    def __init__(self, min_element=-1, max_element=1):
         super().__init__(min_element, max_element)
         self.train_type = None
 
