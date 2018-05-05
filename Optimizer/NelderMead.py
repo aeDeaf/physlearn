@@ -20,19 +20,26 @@ class NelderMead:
     x_center = None
     x_reflected = None
 
-    def __init__(self, end_cond, min_element=-1, max_element=1, end_method='max_iter', alpha=1, beta=0.5,
-                 gamma=2):
-        self.end_cond = end_cond
+    def __init__(self, min_element=-1, max_element=1):
         self.min_element = min_element
         self.max_element = max_element
-        self.end_method = end_method
+        self.end_method = 'max_iter'
+        self.alpha = 1
+        self.beta = 0.5
+        self.gamma = 2
+        self.method_types = [0, 0, 0, 0]
+        self.types_list = []
+        self.cost_list = []
+
+    def set_params(self, alpha, beta, gamma):
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
-        self.method_types = [0, 0, 0, 0]
-        self.cost_list = []
 
-    def optimize(self, func, dim):
+    def set_end_method(self, end_method):
+        self.end_method = end_method
+
+    def optimize(self, func, dim, end_cond):
         # func - оптимизируемая функция, должна принимать numpy.array соотвесвтующей размерности в качесвте параметра
         # dim - размерность функции
         # end_method - условие останова
@@ -44,14 +51,15 @@ class NelderMead:
         self.y_points = numpy.array(list(map(func, self.x_points)))  # Вычисляем значение функции
         # в созданых точках
         if self.end_method == 'max_iter':  # Если условием выхода является достижение некого числа итераций
-            for _ in tqdm(range(self.end_cond)):
+            for _ in tqdm(range(end_cond)):
                 method_type = self.iteration()
+                self.types_list.append(method_type)
                 self.cost_list.append(numpy.min(self.y_points))
                 self.method_types[method_type] += 1
 
         elif self.end_method == 'variance':  # Условие выхода - дисперсия значений функции не больше заданной величины
-            var = self.end_cond + 1
-            while var >= self.end_cond:
+            var = end_cond + 1
+            while var >= end_cond:
                 method_type = self.iteration()
                 self.method_types[method_type] += 1
                 var = NelderMead.variance(self.y_points)
@@ -171,6 +179,9 @@ class NelderMead:
 
     def return_method_types(self):
         return self.method_types
+
+    def return_types_list(self):
+        return self.types_list
 
     def return_cost_list(self):
         return self.cost_list
